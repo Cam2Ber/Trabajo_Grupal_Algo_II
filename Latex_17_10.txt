@@ -1,0 +1,283 @@
+
+\makeatletter
+\def\input@path{{./texmf/tex/latex/AEDLogica/}{./texmf/tex/latex/AEDMacros/}{./texmf/tex/latex/AEDTADs/}{./texmf/tex/latex/AEDEspecificacion/}{./texmf/tex/latex/AEDUtil/}{./texmf/tex/latex/caratula/}}
+
+\makeatother
+
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[left=2.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage{AEDLogica, AEDEspecificacion, AEDTADs}
+\usepackage{caratula}
+\usepackage{setspace}
+\usepackage{graphicx}
+
+\onehalfspacing
+
+
+
+\titulo{Trabajo práctico}
+\subtitulo{TAD Examen de Residencia, primer TP, segunda entrega}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructuras de Datos}
+\grupo{Tirada de Inteligancia} 
+
+\integrante{Rubinstein, Agustin}{670/24}{agustin.n.rubinstein@gmail.com}
+\integrante{Cuadrado Bertollo, Camilo Fidel}{40/25}{cuadradocamilo1@gmail.com}
+\integrante{Alsina, Juan Manuel}{956/23}{elikoperoxd@gmail.com}
+\integrante{Durand Paz, Salvador Benjamín}{835/25}{salvadordurandp@gmail.com}
+
+
+
+% Declaramos donde van a estar las figuras
+% No es obligatorio, pero suele ser comodo
+\graphicspath{{../static/}}
+
+% Asi pueden escribir nuevos comandos. 
+% Este por ejemplo asegura q los nombres 
+% que figuren con una tipografia diferenciada  
+\newcommand{\Tipo}[1]{\mathsf{#1}}
+% la sintaxis es \newcommand{\nombreDeLaMacro}[cantidadDeParametros]{Lo que va ser remplazado por el macro} 
+\newcommand{\norm}[1]{\vert #1\vert}
+
+
+
+
+\begin{document}
+
+\maketitle
+
+
+
+
+
+\newpage 
+\section{
+\section{Comienzo del TAD}
+
+}
+
+\begin{tad}{EdR}
+
+    \obs{Solución}{\seq{\Z}}
+    \\
+    \obs{ExamenesAlumnos}{\seq{\seq{\seq{\Z}}}}
+    \\
+    \obs{Entregas}{\seq{\seq{\bool}}}
+    \\
+    \obs{Sentados}{\seq{\seq{\bool}}}
+    \\
+
+\\
+\begin{proc}{crearEDR} {\In CantidadAlumnos:\Z, Examen:\seq{\Z}, Lado:\Z} {EdR}
+\requiere{Lado > 0 \\ \land SoluciónValida(Examen) \\ \land 0 < CantidadAlumnos \leq CapacidadDelAula(Lado)}
+\\
+\aseguraLargo{res.Solución=Examen 
+\\
+\land EsMatriz(res.Sentados) 
+\\
+\land NumerodeSentados(res.Sentados) = CantidadAlumnos
+\\
+\land NoHayAlumnosPegados(res.Sentados)
+\\
+\land MismasDimensionesBool(res.Sentados, res.Entregas) 
+\\
+\land MismasDimensionesMixto(res.ExamenesAlumnos, res.Sentados) 
+\\
+\land EsCuadrado(res.Sentados) 
+\\
+\land |res.Sentados| = Lado 
+\\
+\land todoAlumnoRecibeExamenVacio(ExamenesAlumnos) 
+\\
+\land NoEntregoNadie(res.Entrega)}
+\end{proc}
+
+\makeatletter
+
+\begin{proc}{Igualdad}{\In a:EdR, b:EdR} {\bool}
+\\\requiere{True}
+\asegura{res=True \iff (MismaSolucion(a.Solución, b.Solución) 
+\\\land MismaMatrizBool(a.Entregas, b.Entregas) \\ \land MismaMatrizBool(a.Sentados, b.Sentados) 
+\\ \land a.ExamenesAlumnos = b.ExamenesAlumnos}
+\end{proc}
+
+\begin{proc}{copiarse} {\In estudiante: \tupla{\Z,\Z}, \Inout edr:EdR}
+\\
+\requiere{enRango(estudiante, edr.Sentados) \land edr = e0}
+\asegura{MismaSolucion(edr.Solucion, e0.Solucion) \land \\ MismaMatrizBool(edr.Sentados, e0.Sentados) \land \\ MismaMatrizBool(edr.Entregas, e0.Entregas) \land \\ MismasDimensionesSeqEnteros(edr.ExamenesAlumnos, e0.ExamenesAlumnos) \yLuego
+\\
+\paraTodo{p}{\tupla{\Z,\Z}}{(EnRango(p, edr.Sentados) \land p \neq estudiante) \\
+\implicaLuego (MismaSolucion(edr.ExamenesAlumnos[p_0][p_1], \\e0.ExamenesAlumnos[p_0][p_1]))} \land\\ edr.ExamenesAlumnos[estudiante_0][estudiante_1] =\\ EstudianteSeCopia(Estudiante, edr)}
+%\asegura{}%cercano: +1 en su columna o +2 -2 en su fila REQ
+%Tiene ejercicio que el que copia no tiene 
+%Modifica El examen agregando ejercicio copiado
+\end{proc}
+
+\begin{proc}{consultarDarkWeb}{\In n :\Z, \In ExamenDark: \seq{\Z}, \Inout edr:EdR}{
+\\\requiere{n \geq 0 \land e_0 = edr \land SolucionValida(ExamenDark) \land |ExamenDark| = |edr.Solucion|}
+\asegura{|edr.ExamenesAlumnos| = |e_0.ExamenesAlumnos| \yLuego \existe{Copiones}{\seq{\tupla{\Z,\Z}}}{(0 \leq |Copiones| \leq n \land 
+\paraTodo{i}{\Z}{0 \leq i < |Copiones| 
+\\\implicaLuego (SentadosYSinEntregar(Copiones[i], edr.Sentados, edr.Entregas) \yLuego
+\\edr.ExamenesAlumnos[Copiones[i]_0][Copiones[i]_1] = ExamenDark)}) \land \paraTodo{noCopiones}{\tupla{\Z,\Z}}{(EnRango(noCopiones, edr.Sentados) \land noCopiones \notin Copiones)\implicaLuego\\(edr.ExamenesAlumnos[noCopiones_0][noCopiones_1] = \\e_0.ExamenesAlumnos[noCopiones_0][noCopiones_1])}} 
+\land
+\\MismaMatrizBool(edr.Sentados, e_0.Sentados) \land \\MismaMatrizBool(edr.Entregas, e_0.Entregas)}}
+%Como Mucho N estudiantes van a tener examen de la  DarkWeb
+\end{proc}
+
+\begin{proc}{resolver} {\In pasosParaCompletar: \seq{\seq{\Z}}, Estudiante:\tupla{\Z,\Z}, \Inout edr:EdR}{\seq{\seq{\Z}}}
+\requiere{EnRango(Estudiante, edr.Sentados),\\ \paraTodo{i}{\Z}{0 \leq i < |pasosParaCompletar| \\\implicaLuego (|pasosParaCompletar[i]| = |edr.Solucion| \land (i+1<|pasosParaCompletar| \\\implicaLuego CantidadRespuestasVacias(pasosParaCompletar[i])+1 = \\CantidadRespuestasVacias(pasosParaCompletar[i+1]) \land\\ SoloModificaUnElemento(pasosParaCompletar[i], pasosParaCompletar[i+1])))))} \land \\CantidadRespuestasVacias(pasosParaCompletar[|pasosParaCompletar|-1])>0 \land e_0=edr}
+\\
+\asegura{MismaSolucion(edr.Solución, e_0.Solución) \land\\ MismaMatrizBool(edr.Entregas, e_0.Entregas) \land \\MismaMatrizBool(edr.Sentados, e_0.Sentados) \land 
+\\
+\paraTodo{p}{\tupla{\Z,\Z}}{(EnRango(p, e_0.Sentados) \land p \neq Estudiante) \\\implicaLuego edr.ExamenesAlumnos[p_0][p_1] = e_0.ExamenesAlumnos[p_0][p_1]} \land
+\\ 
+\paraTodo{i}{\Z}{0 \leq i < |pasosParaCompletar| \ImplicaLuego pasosParaCompletar[i] = res[i]} \\\land |res| = |pasosParaCompletar|+1 \land CantidadRespuestasVacias(res[|res|-1])=CantidadRespuestasVacias(res[|res|-2])+1 \\\land edr.ExamenesAlumnos[Estudiante_0][Estudiante_1] = res[|res|-1]}
+%Requiere que estudiante este en rango
+%Requiere que pasosParaCompletar sea valido (Misma longitud que examen, Cada uno modificacion del anterior)
+\end{proc}
+
+
+\begin{proc}{entregar} {\In Estudiante: \tupla{\Z,\Z}, \Inout edr: EdR}{}
+\requiere{EnRango(Estudiante, edr.Entrega) \\ \land edr=edr_0}
+\asegura{edr.Entregas[Estudiante_0][Estudiante_1] = True \land \\MismaSolucion(edr.Solución, edr_0.Solución) 
+\\\land MismaMatrizBool(edr.Sentados, edr_0.Sentados) 
+\\\land MismoExamentesAlumnos(edr.ExamenesAlumnos, \\edr_0.ExamenesAlumnos)
+\\\land MismasDimensionesBool(edr.Entregas, edr_0.Entregas)
+\\\yLuego\paraTodo{p}{\tupla{\Z,\Z}}{(p \neq Estudiante \land EnRango(p, edr.Entregas) \implicaLuego edr.Entregas[p_0][p_1] = edr_0.Entregas[p_0][p_1])}}
+\end{proc}
+
+\begin{proc}{chequearCopias} {\In edr: EdR} {\seq{\tupla{\Z,\Z}}}
+\requiere{MismaMatrizBool(edr.Entregas, edr.Sentados)}
+\asegura{res = listaAlumnosCopiones(edr)}
+%asegura que la tupla esté en rango
+%Asegura Que si alumno está en res, es porque se copio
+
+\end{proc}
+
+\begin{proc}{corregir} {\In edr: EdR} {{\seq{Struct{Fila:\Z,Columna:\Z,Nota:\R}}}}
+\requiere{MismaMatrizBool(edr.Entregas, edr.Sentados)}
+\asegura{\paraTodo{p}{\tupla{\Z,\Z}}{(EnRango(p,edr.Sentados) \land p \notin listaAlumnosCopiones(edr)) \\\implicaLuego ((res.Fila=p_0 \land Struct.Columna=p_1 \land
+\\Struct.Nota=PorcentajeMismoExamen(edr.Solucion, edr.ExamenesAlumnos[p_0][p_1])})\in res)}}
+
+\end{proc}
+\newpage
+
+\Section{
+\section{Predicados y Auxiliares}
+}
+
+\predLargo{EsMatriz}{Matriz: \seq{\seq{\bool}}}
+    {\existe{l}{\Z}{\paraTodo{i}{\Z}{0 \leq i < |Matriz| \implicaLuego |Matriz[i]| = l}}}
+
+\predLargo{EsCuadrado}{Matriz: \seq{\seq{\bool}}}
+    {{\paraTodo{i}{\Z}{0 \leq i < |Matriz| \implicaLuego |Matriz[i]| = |Matriz|}}}
+
+\predLargo{SoluciónValida}{Solución: \seq{\Z}}{\paraTodo{i}{\Z}
+    {0 \leq i < |Solución| \implicaLuego 0 \leq Solución[i] \leq 9}}
+\\
+
+\predLargo{MismasDimensionesSeqEnteros}{Matriz1:  \seq{\seq{\seq{\Z}}}, Matriz2: \seq{\seq{\seq{\Z}}}}
+{|Matriz1| = |Matriz2| \yLuego \paraTodo{i}{\Z}{0 \leq i < |Matriz1| \\
+    \implicaLuego |Matriz1[i]| = |Matriz2[i]|}}
+
+\\
+\predLargo{MismasDimensionesBool}{Matriz1:  \seq{\seq{\bool}}, Matriz2: \seq{\seq{\bool}}}
+{|Matriz1| = |Matriz2| \yLuego \paraTodo{i}{\Z}{0 \leq i < |Matriz1| \\
+    \implicaLuego |Matriz1[i]| = |Matriz2[i]|}}
+\\
+\predLargo{MismasDimensionesMixto}{Matriz1:  \seq{\seq{\seq{\Z}}}, Matriz2: \seq{\seq{\bool}}}
+{|Matriz1| = |Matriz2| \yLuego \paraTodo{i}{\Z}{0 \leq i < |Matriz1| \\
+    \implicaLuego |Matriz1[i]| = |Matriz2[i]|}}
+\\
+\predLargo{NoHayAlumnosPegados}{sentados: \seq{\seq{\bool}}}
+    {\paraTodo{i}{\Z}{0 \leq i < |sentados| \implicaLuego \paraTodo{j}{\Z}{0 \leq j <|sentados[i]|
+    \\\implicaLuego (sentados[i][j] = True \implica (\neg EnRango(\tupla{i,j+1}, sentados) \oLuego\\ sentados[i][j+1] = False)}}}
+\\
+\predLargo{todoAlumnoRecibeExamenVacio}{ExamenesAlumnos: \seq{\seq{\seq{\Z}}}}
+    {\paraTodo{x}{\Z}{0 \leq x < |ExamenesAlumnos|\\\implicaLuego\paraTodo{y}{\Z}{0 \leq y < |ExamenesAlumnos[x]|\\\implicaLuego \paraTodo{z}{\z}{0 \leq z < |ExamenesAlumnos[x][y]|\\\implicaLuego (ExamenesAlumnos[x][y][z] < 0 \lor ExamenesAlumnos[x][y][z] > 9)}}}}
+    
+\\
+\predLargo{NoEntregoNadie}{s1 :\seq{\seq{\bool}}}
+    {\paraTodo{x}{\Z}{ 0 \leq x < |s1|}
+    \implicaLuego  \paraTodo{y}{\Z}{0 \leq y < |s1| \implicaLuego{s1[x][y] = False}}}
+\\
+\predLargo{MismaSolucion}{s1: \seq{\Z}, s2: \seq{\Z}}
+    {|s1| = |s2| \yLuego \paraTodo{i}{\Z}{0 \leq i < |s1| \implicaLuego s1[i] = s2[i]}}
+\\
+\predLargo{MismaMatrizBool}{m1: \seq{\seq{\bool}}, m2: \seq{\seq{\bool}}}
+    {m1=m2}
+\\
+\predLargo{MismoExamentesAlumnos}{e1: \seq{\seq{\seq{\Z}}}, e2: \seq{\seq{\seq{\Z}}}}
+    {|e1| = |e2| \yLuego \paraTodo{x}{\Z}{0 \leq x < |e1|\\\implicaLuego (|e1[x]| = |e2[x]| \yLuego\paraTodo{y}{\Z}{0 \leq y < |e1[x]|\\\implicaLuego (|e1[x][y]| = |e2[x][y]| \yLuego\paraTodo{z}{\z}{0 \leq z < |ExamenesAlumnos[x][y]|\\\implicaLuego (e1[x][y][z] = e2[x][y][z]))}}}}
+\\
+\predLargo{EnRango}{p: \tupla{\Z,\Z}, Matriz: \seq{\seq{\bool}}}
+    {0 \leq p_0 < |Matriz| \yLuego 0 \leq p_1 < |Matriz[p_0]|}
+
+\\
+\predLargo{SentadosYSinEntregar}{p:\tupla{\Z,\Z}, Sentados:\seq{\seq{\bool}}, Entregas:\seq{\seq{\bool}}}
+    {EnRango(p,Sentados) \yLuego (Sentados[p_0][p_1] = True \land Entregas[p_0][p_1] = False)}
+
+
+\\
+\predLargo{SospechosoDeCopiaHorizontal}{p:\tupla{\Z, \Z}, edr:EdR}{
+    EnRango(p,edr.Sentados) \yLuego (EnRango(\tupla{p_0,p_1+2}, edr.Sentados) \\\yLuego PorcentajeMismoExamen(edr.Sentados[p_0][p_1], edr.Sentados[p_0][P_1+2]) >  60) \lor
+    (EnRango(\tupla{p_0,p_1-2}, edr.Sentados)) \\\yLuego PorcentajeMismoExamen( edr.Sentados[p_0][p_1], edr.Sentados[p_0][P_1-2]) >  60)
+}
+
+\\
+\predLargo{SospechosoDeCopiaVertical}{p:\tupla{\Z, \Z}, edr:EdR}{
+    (EnRango(p,edr.Sentados) \land EnRango(\tupla{p_0+1,p_1}, edr.Sentados)) \\ \yLuego PorcentajeMismoExamen( edr.Sentados[p_0][p_1], edr.Sentados[p_0+1][P_1]) >  60 
+}
+
+ 
+}
+\\
+\predLargo{SoloModificaUnElemento}{a:\seq{ }, b: \seq{}}
+{\existe{j}{\Z}{(0 \leq j < |a| \land a[j] \neq b[j]) \yLuego \neg(\existe{i}{\Z}
+{0\leq i<|a| \yLuego (a[i] \neq b[i] \land i \neq j))}}}
+\newline
+
+\\
+\predLargo{SospechosoDeCopiaGeneral}{listaExamenes:\seq{\seq{\seq{\Z}}}, estudiante:{\tupla{\Z,\Z}}}
+    {(0 \leq estudiante_0 < |listaExamenes| \yLuego\  0 \leq estudiante_1 < |listaExamenes[estudiante_0]|) \yLuego \\Porcentaje({$\sum_{k=0}^{|listaExamenes|-1}\sum_{i=0}^{|listaExamenes[k]|}$}IfThenElseFi\\(MismaSolucion(listaExamenes[k][i], listaExamenes[estudiante_0][estudiante_1]),\\ 1, 0), |listaExamenes[estudiante_0][estudiante_1]|) > 25}
+\\
+
+\newline
+\aux{PorcentajeMismoExamen}{a:\seq{\Z}, b:\seq{\Z}}{\R}\\{
+    Porcentaje({$\sum_{k=0}^{|a|-1}$}IfThenElseFi(a[k]=b[k],1,0), \norm{a})}
+\\    
+\newline
+\aux{NumerodeSentados}{Matriz:$\seq{\seq{\bool}}$$}{\Z}\\
+    \\{$\sum_{k=0}^{|Matriz|-1}\sum_{i=0}^{|Matriz[k]|-1}$IfThenElseFi(Matriz[k][i]=True, 1, 0)}
+\\
+\newline
+\aux{CapacidadDelAula}{a:\Z}{\Z}{\\IfThenElseFi(a\mod{2}=0,(a*a)/2, (a*(a+1))/2)}
+\\    
+\newline
+\aux {ExamenCercano}{p: \tupla{\Z,\Z},edr:EdR}{\seq{\seq{\Z}}}
+    {\\\paraTodo{q}{\tupla{\Z,\Z}}{EnRango(q, edr.Sentados) \\\implicaLuego (ExamenesAlumnos[q]\in res \iff (q=\tupla{p_0,p_1+1} \lor q=\tupla{p_0+2,p_1} \lor q=\tupla{p_0-2,p_1}))}}
+\\
+\newline
+\aux{EstudianteSeCopia}{a: \tupla{\Z,\Z} edr: EdR}{\seq{\Z}}
+{\paraTodo{i}{\Z}{0\leq i < ExamenCercano(a, edr)} \existe{j}{\Z}{0 \leq j < |edr.solucion| \yLuego edr.examenesAlumnos[a_0][a_1][j]>9 \lor edr.examenesAlumnos[a_0][a_1][j]<0  \land  \paraTodo{k}{\Z}{0 \leq k < |edr.examenesAlumnos| \land k \neq j \implicaLuego res= edr.examenesAlumnos[a_0][a_1] \land edr.examenesAlumnos[a_0][a_1][j] = ExamenCercano(a, edr)[i][j] }} 
+}
+\\
+\newline
+\aux{Porcentaje}{n:\Z, Total:\Z}{\R}{(n*100)/Total}
+\\
+\newline
+\aux{listaAlmunosCopiones}{ edr : EdR} {res: \seq{\tupla{\Z,\Z}}}{\\
+    \paraTodo{p}{\tupla{\Z,\Z}}{(EnRango(p,edr.Sentados) \yLuego (SospechosoDeCopiaHorizontal(p, edr) \\\lor SospechosoDeCopiaVertical(p, edr) \lor SospechosoDeCopiaGeneral(edr.ExamenesAlumnos, p) \implicaLuego p \in res}
+}
+\\
+\newline
+\aux{CantidadRespuestasVacias}{Examen: \seq{\Z}}{\Z} \\{
+    {$\sum_{k=0}^{|Examen|-1}$$}IfThenElseFi(0 < Examen[k] \lor Examen[k] > 9, 1, 0)
+}
+\end{tad}
+\end{document}
